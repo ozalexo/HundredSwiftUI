@@ -9,12 +9,39 @@
 import SwiftUI
 
 struct ContentView: View {
-
     @State private var checkAmount = ""
     @State private var numberOfPeople = 2
     @State private var tipPercentage = 2
 
     let tipPercentages = [10, 15, 20, 25, 0]
+
+    private var formattedCheckAmount: Double? {
+        guard checkAmount != "" else {
+            return nil
+        }
+        let formatter = NumberFormatter()
+        formatter.usesGroupingSeparator = true
+        formatter.numberStyle = .decimal
+        formatter.locale = Locale.current
+        guard let formattedAmount = formatter.number(from: checkAmount) else {
+            return nil
+        }
+        return Double(truncating: formattedAmount)
+    }
+
+    var totalPerPerson: Double {
+        let peopleCount = Double(numberOfPeople + 2)
+        let tipSelection = Double(tipPercentages[tipPercentage])
+
+        guard let orderAmount = formattedCheckAmount else {
+            return 0
+        }
+        let tipValue = orderAmount / 100 * tipSelection
+        let grandTotal = orderAmount + tipValue
+        let amountPerPerson = grandTotal / peopleCount
+
+        return amountPerPerson
+    }
 
     var body: some View {
         NavigationView {
@@ -40,10 +67,10 @@ struct ContentView: View {
                 }
 
                 Section {
-                    Text("$\(checkAmount)")
+                    Text("$\(totalPerPerson)")
                 }
             }
-        .navigationBarTitle("WeSplit")
+            .navigationBarTitle("WeSplit")
         }
     }
 }
